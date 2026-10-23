@@ -1,0 +1,13 @@
+interface:
+  display_name: 项目复盘知识卡
+  short_description: 递归读取项目资料，依据复盘规范生成有来源、可核查的 Markdown 知识卡
+  default_prompt: 使用 $project-retrospective-card 读取指定项目文件夹的全部资料，按照模板和复盘规范生成项目知识卡。
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
