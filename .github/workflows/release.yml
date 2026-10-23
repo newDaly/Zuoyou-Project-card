@@ -49,13 +49,13 @@ jobs:
         run: |
           cat > release-notes.md <<'EOF'
           ## 项目复盘知识卡 Skill
-          递归读取项目资料，依据统一模板与复盘规范生成 Markdown 知识卡及资料核查文件。
+          面向 WorkBuddy、豆包工作和 Codex。先扫描并提醒其他格式、压缩包及加密/检测未知文件，再读取资料；最终仅交付知识卡 Markdown，清理本次过程文件。推荐使用 Obsidian 阅读与编辑。
           
           ### 安装
-          下载 project-retrospective-card 版本 ZIP，解压后将整个 project-retrospective-card 文件夹放入 ~/.codex/skills/（Windows 为 %USERPROFILE%\.codex\skills\），安装 scripts/requirements.txt 中的依赖，重新载入 Agent。
+          WorkBuddy 使用技能页面上传完整 ZIP；豆包工作按当前客户端本地导入/自定义技能入口导入完整资源；Codex 将解压后的完整文件夹放入 ~/.agents/skills/。详见仓库 README 与 references/安装与使用.md。
           
           ### 调用
-          使用 $project-retrospective-card，读取指定项目文件夹，生成项目知识卡。
+          使用项目复盘知识卡技能，先扫描指定文件夹并提醒异常格式、压缩包和加密文档，最终只保留知识卡 Markdown。
           
           支持 Word、Excel、PowerPoint、PDF 与常见文本的文字提取；扫描件和图形内容需宿主工具补读。缺失信息与未读内容明确标记。SHA256SUMS.txt 可用于验证 ZIP 完整性。
           EOF

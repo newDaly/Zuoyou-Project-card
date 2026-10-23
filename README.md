@@ -1,68 +1,43 @@
 # Zuoyou Project Card
 
-面向咨询项目复盘与知识沉淀的 Agent Skill。递归读取指定项目文件夹，依据统一模板与复盘规范生成 Markdown 项目知识卡及资料核查文件。
+面向 **WorkBuddy、豆包工作、Codex 等 Agent** 的项目复盘知识卡 Skill。依据统一模板与复盘规范，读取项目资料并生成有来源的 Markdown 知识卡。
 
-## 功能
+## 安装
 
-- 保留知识卡元数据、联系人及五个主栏目。
-- 建立“核心问题—解决方案—最终成果”对应关系。
-- 提炼项目挑战、改进经验及有依据的可复制方法。
-- 记录资料来源、冲突、未读文件及待补充内容，不将规范示例视为项目事实。
+从 [Releases 下载最新 ZIP](https://github.com/newDaly/Zuoyou-Project-card/releases/latest)。详细步骤见 [安装与使用](project-retrospective-card/references/安装与使用.md)。
 
-## 安装到 Codex
+| Agent | 安装方式 |
+|---|---|
+| WorkBuddy | 技能页面→添加技能→上传完整技能包，导入后启用 |
+| 豆包工作 | “技能·连接器·伙伴”中的本地技能导入/自定义技能入口，按当前客户端支持的形式导入完整资源 |
+| Codex | 将完整 project-retrospective-card 文件夹放入本机 ~/.agents/skills/，重新载入 Agent |
 
-需要 Git、Python 3.10 或以上版本，以及具有本地文件访问和代码执行能力的 Agent。私有仓库需要先获得读取权限并完成 GitHub 身份验证。
-
-先克隆仓库：
-
-```bash
-git clone https://github.com/newDaly/Zuoyou-Project-card.git
-```
-
-macOS / Linux：
-
-```bash
-mkdir -p ~/.codex/skills
-cp -R Zuoyou-Project-card/project-retrospective-card ~/.codex/skills/
-python3 -m pip install -r ~/.codex/skills/project-retrospective-card/scripts/requirements.txt
-```
-
-Windows PowerShell：
-
-```powershell
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
-Copy-Item -Recurse ".\Zuoyou-Project-card\project-retrospective-card" "$env:USERPROFILE\.codex\skills\"
-python -m pip install -r "$env:USERPROFILE\.codex\skills\project-retrospective-card\scripts\requirements.txt"
-```
-
-安装后重新载入 Agent。若已存在同名技能，请先备份旧版本再替换。其他支持 SKILL.md 的 Agent 按其技能目录规则安装。
+需要可访问目标文件夹的文件工具；脚本需 Python 3.10+ 及 scripts/requirements.txt 中依赖。云端环境不能直接访问电脑路径时需先提供可访问副本。各客户端的导入入口、包格式和权限以当前版本为准，完整兼容性未逐个平台实机验证。
 
 ## 使用
 
-向 Agent 输入：
-
 ```text
-使用 $project-retrospective-card，读取 D:/项目资料/某项目，生成项目知识卡。
+使用项目复盘知识卡技能，读取 D:/项目资料/某项目。
+先扫描并提醒其他格式、压缩包和加密文档，最后仅保留知识卡 Markdown。
 ```
 
-默认一个文件夹对应一个项目，包含子文件夹。发现混合项目时先确认分组。
+默认一个文件夹对应一个项目，递归包含子文件夹；批量项目需明确分组。
 
-输出到目标文件夹的 `知识卡输出`：
+## 执行规则
 
-- `项目名称_项目知识卡.md`
-- `项目名称_资料读取与核查.md`
-- 文档提取文本和清单
+1. 首先扫描六类正常资料：Word、Excel、PPT、PDF、Markdown、图片。
+2. 汇总其他扩展名并提醒，单独突出压缩包、确认加密、无法完成加密检测的文件。TXT/CSV 等虽可提取文字，仍属于其他格式。
+3. 提醒后读取可用资料；默认不解压、不破解，阻断核心资料时先确认如何继续。
+4. 按模板形成背景、核心问题、问题—方案—成果、挑战与经验、阅读笔记。
+5. **最终仅输出项目知识卡 .md**：来源映射、异常与未读边界写入卡内，不另交付核查报告。
+6. 核验成功后清理本次独立临时工作区，只删除本次生成的过程文件；保留输入资料、用户原有文件及历史知识卡。
 
-已存在输出不会被直接覆盖。安装本身不会扫描文件，只有调用后才读取指定目录。
+脚本自动提取常见现代 Office、PDF 与文本中的可访问文字；图片、扫描页和复杂图示需视觉/OCR补读，旧版 Office 需适用工具转换。加密检测是尽力检查，无法检测必须明确报告，不把“未知”写成“无加密”。
 
-## 文档支持与限制
+## 推荐阅读与编辑工具
 
-脚本支持 DOCX、XLSX/XLSM、PPTX、PDF 和常见文本格式；它负责清点与文字提取，分析及知识卡填写由 Agent 完成。扫描件、图片、图表、批注和嵌入对象需宿主工具补读；旧版 Office 文件需本地转换。无法读取时必须在核查文件中披露，不保证任何格式都能自动完整解析。
+推荐使用 [Obsidian](https://obsidian.md/)：把知识卡放入已有仓库，或将知识卡输出目录打开为仓库，直接阅读和编辑 Markdown，利用属性、标签、链接和搜索积累公司项目知识。详见 [Obsidian 使用建议](project-retrospective-card/references/安装与使用.md#推荐-obsidian-阅读与编辑)。
 
-资料缺失写“待补充”，存在冲突写“待核实”；建议、已交付成果、已实施机制和实际效果分别表述。
+## 更新说明
 
-## 仓库内容
-
-`project-retrospective-card/` 内含执行说明、原始 Markdown 模板、复盘规范转录、文档提取脚本及依赖清单。
-
-项目原始资料、联系人信息及生成结果不应提交到本仓库。默认不调用外部 OCR 服务、不执行宏、不修改源文档。
+v1.1.0：新增多 Agent 安装说明与 Obsidian 建议；增加前置扫描、非标准格式/压缩包/加密提醒；改为单份知识卡交付及本次过程文件清理。仓库含模板、规范与脚本，不包含项目原始资料或生成的知识卡。
