@@ -1,0 +1,62 @@
+name: Publish Skill Release
+on:
+  push:
+    branches: [main]
+    paths: [release-version.txt]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: skill-release
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package and verify skill
+        id: package
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, re, zipfile
+          version = Path("release-version.txt").read_text().strip()
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", version):
+              raise SystemExit("Invalid version")
+          root = Path("project-retrospective-card")
+          assert (root / "SKILL.md").is_file()
+          out = Path("dist")
+          out.mkdir(exist_ok=True)
+          archive = out / f"project-retrospective-card-{version}.zip"
+          with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
+              for p in sorted(root.rglob("*")):
+                  if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc":
+                      z.write(p, p.as_posix())
+          with zipfile.ZipFile(archive) as z:
+              assert z.testzip() is None
+              assert "project-retrospective-card/SKILL.md" in z.namelist()
+          checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+          (out / "SHA256SUMS.txt").write_text(f"{checksum}  {archive.name}\n")
+          with open(__import__("os").environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"version={version}\n")
+          PY
+      - name: Publish release and ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.package.outputs.version }}
+        shell: bash
+        run: |
+          cat > release-notes.md <<'EOF'
+          ## 项目复盘知识卡 Skill
+          递归读取项目资料，依据统一模板与复盘规范生成 Markdown 知识卡及资料核查文件。
+          
+          ### 安装
+          下载 project-retrospective-card 版本 ZIP，解压后将整个 project-retrospective-card 文件夹放入 ~/.codex/skills/（Windows 为 %USERPROFILE%\.codex\skills\），安装 scripts/requirements.txt 中的依赖，重新载入 Agent。
+          
+          ### 调用
+          使用 $project-retrospective-card，读取指定项目文件夹，生成项目知识卡。
+          
+          支持 Word、Excel、PowerPoint、PDF 与常见文本的文字提取；扫描件和图形内容需宿主工具补读。缺失信息与未读内容明确标记。SHA256SUMS.txt 可用于验证 ZIP 完整性。
+          EOF
+          gh release create "$VERSION" "dist/project-retrospective-card-$VERSION.zip" dist/SHA256SUMS.txt --target "$GITHUB_SHA" --title "项目复盘知识卡 Skill $VERSION" --notes-file release-notes.md
