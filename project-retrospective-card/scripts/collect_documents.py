@@ -68,9 +68,9 @@ def extract(p):
             w.close()
     raise ValueError('格式不支持自动提取，需 Agent 补读或本地转换')
 
-STANDARD = {'.doc', '.docx', '.docm', '.dot', '.dotx', '.dotm', '.xls', '.xlsx', '.xlsm', '.xlsb', '.xlt', '.xltx', '.xltm', '.ppt', '.pptx', '.pptm', '.pps', '.ppsx', '.ppsm', '.pot', '.potx', '.potm', '.pdf', '.md', '.markdown', '.mdown', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tif', '.tiff', '.webp', '.heic', '.heif', '.svg', '.avif', '.ico'}
+STANDARD = {'.doc', '.docx', '.docm', '.dot', '.dotx', '.dotm', '.xls', '.xlsx', '.xlsm', '.xlsb', '.xlt', '.xltx', '.xltm', '.ppt', '.pptx', '.pptm', '.pps', '.ppsx', '.ppsm', '.pot', '.potx', '.potm', '.pdf', '.md', '.markdown', '.mdown', '.png', '.jpg', '.jpeg', '.jp2', '.gif', '.bmp', '.tif', '.tiff', '.webp', '.heic', '.heif', '.svg', '.avif', '.ico'}
 ARCHIVES = {'.zip', '.rar', '.7z', '.tar', '.gz', '.tgz', '.bz2', '.xz', '.zst', '.cab', '.iso'}
-IMAGES = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tif', '.tiff', '.webp', '.heic', '.heif', '.svg', '.avif', '.ico'}
+IMAGES = {'.png', '.jpg', '.jpeg', '.jp2', '.gif', '.bmp', '.tif', '.tiff', '.webp', '.heic', '.heif', '.svg', '.avif', '.ico'}
 OFFICE = {e for e in STANDARD if e.startswith(('.doc', '.dot', '.xls', '.xlt', '.ppt', '.pps', '.pot'))}
 
 

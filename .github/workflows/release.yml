@@ -48,15 +48,20 @@ jobs:
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
-          ## 项目复盘知识卡 Skill
-          面向 WorkBuddy、豆包工作和 Codex。先扫描并提醒其他格式、压缩包及加密/检测未知文件，再读取资料；最终仅交付知识卡 Markdown，清理本次过程文件。推荐使用 Obsidian 阅读与编辑。
+          ## 项目复盘知识卡 Skill v1.2.0
+          扫描项目资料并提醒非规范格式、压缩包与加密项；联动MinerU在线批量API或本地部署转换，合并项目内容Markdown后，Agent仅据此生成知识卡。
           
-          ### 安装
-          WorkBuddy 使用技能页面上传完整 ZIP；豆包工作按当前客户端本地导入/自定义技能入口导入完整资源；Codex 将解压后的完整文件夹放入 ~/.agents/skills/。详见仓库 README 与 references/安装与使用.md。
+          ### 本次更新
+          - 新增MinerU本地CLI调度与在线提交、查询、结果下载适配。
+          - 保留来源编号、文件哈希、转换状态与未转边界，失败默认阻止合并。
+          - 正式交付两份Markdown：项目内容总文档、项目知识卡；清理其他本次过程文件。
+          - 最终提醒使用者人工核对项目事实与成果状态。
           
-          ### 调用
-          使用项目复盘知识卡技能，先扫描指定文件夹并提醒异常格式、压缩包和加密文档，最终只保留知识卡 Markdown。
+          ### 安装与配置
+          WorkBuddy导入完整ZIP；豆包工作按当前版本本地导入入口导入完整资源；Codex使用本机技能目录。详见README与references/安装与使用.md。
+          本地模式另需可用的MinerU部署；在线模式需MINERU_API_TOKEN及项目资料上传授权。调用详见references/MinerU转换与合并.md。
           
-          支持 Word、Excel、PowerPoint、PDF 与常见文本的文字提取；扫描件和图形内容需宿主工具补读。缺失信息与未读内容明确标记。SHA256SUMS.txt 可用于验证 ZIP 完整性。
+          ### 验证边界
+          已完成脚本与模拟接口测试，尚未完成真实MinerU模型/在线账号端到端解析验收。SHA256SUMS.txt可校验安装包。
           EOF
           gh release create "$VERSION" "dist/project-retrospective-card-$VERSION.zip" dist/SHA256SUMS.txt --target "$GITHUB_SHA" --title "项目复盘知识卡 Skill $VERSION" --notes-file release-notes.md
