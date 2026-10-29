@@ -48,22 +48,18 @@ jobs:
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
-          ## 项目复盘知识卡 Skill v1.3.0
-          一次向Agent提供项目文件夹，自动完成扫描提醒、本地MinerU解析、全文合并、按规范写卡、核验清理，最终保留两份Markdown。
+          ## 项目复盘知识卡 Skill v1.3.1
+          增加首次安装者必读的MinerU前置部署说明，现有本地一键处理流程保持可用。
           
-          ### 本次更新
-          - 自动识别D:/MinerU/.venv/Scripts/mineru-kit.exe、配置路径或系统PATH。
-          - 新增run_project.py统一入口，默认串行解析以适配单卡8GB显存。
-          - 不依赖WebUI或7860端口，不要求在线Token，不自动改为在线上传。
-          - Agent读取总Markdown生成知识卡并自动执行结构核验与临时文件清理。
-          - 同名历史成果保留，最终提醒人工核对后归档。
+          ### 本次补充
+          - Windows PowerShell独立环境安装、macOS/Linux部署步骤。
+          - 模型下载、verify和真实样本文档转换三项检查。
+          - 完整Skill导入、脚本依赖及本地可执行文件路径配置。
+          - WebUI/7860端口、缺少pip、下载失败、显存不足等常见问题。
+          - 本地模型与远程服务配置边界、已有部署跳过重复安装。
           
-          ### 安装与调用
-          更新完整技能目录后，在WorkBuddy、豆包工作或Codex中说明项目文件夹及本地MinerU安装位置即可。
-          详见README、references/安装与使用.md和references/本地一键执行.md。
-          Python脚本完成解析合并；智能知识卡由Agent按规范撰写，不是脱离Agent双击脚本自动调用LLM。
-          
-          ### 验证边界
-          通过统一入口和模拟可执行文件测试；未直接访问使用者Windows D盘实机验收。附SHA256SUMS.txt。
+          首次使用请先读references/MinerU前置部署.md，再按references/安装与使用.md导入技能。
+          最终保留项目内容Markdown与项目知识卡Markdown两份文件，供人工确认及Obsidian阅读编辑。
+          命令已参照官方文档核对，未在所有硬件环境逐一安装验证。附SHA256SUMS.txt。
           EOF
           gh release create "$VERSION" "dist/project-retrospective-card-$VERSION.zip" dist/SHA256SUMS.txt --target "$GITHUB_SHA" --title "项目复盘知识卡 Skill $VERSION" --notes-file release-notes.md

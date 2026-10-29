@@ -6,6 +6,17 @@
 
 **扫描提醒 → 本地解析 → 全文合并 → 按规范生成知识卡 → 核验清理 → 提醒人工确认**
 
+## 首次使用前必须准备
+
+本Skill不包含MinerU程序和模型。未部署的同事请先看 **[MinerU前置部署指南](project-retrospective-card/references/MinerU前置部署.md)**：
+
+1. 按Windows PowerShell或macOS/Linux步骤创建独立环境，安装MinerU 4.x。
+2. 下载模型，运行verify，并完成一份真实小样本转换。
+3. 导入完整Skill，在实际运行脚本的Python环境安装依赖。
+4. 告诉Agent本地MinerU与项目文件夹路径，一次请求完成两份Markdown。
+
+指南提供模型源选择、本地配置、uv/pip区别及常见问题排查。已能正常解析的同事跳过部署，直接连接Skill；无需重装或重复下载模型。
+
 ## 下载与安装
 
 下载 [最新Release安装包](https://github.com/newDaly/Zuoyou-Project-card/releases/latest)。详细安装方法见 [安装与使用](project-retrospective-card/references/安装与使用.md)。
@@ -63,6 +74,8 @@
 在线模式只在用户明确要求时使用，需Token及本批项目上传授权。逐阶段命令及在线API说明见 [MinerU转换与合并](project-retrospective-card/references/MinerU转换与合并.md)，默认流程不要求用户逐条执行。
 
 ## 版本
+
+v1.3.1：补充首次安装者必读的MinerU前置部署、模型验证、真实样本验收、Skill连接和常见问题指南。
 
 v1.3.0：本地默认一键流程、D盘/PATH自动识别、8GB显存默认串行、自动衔接Agent写卡与结构核验清理。
 
