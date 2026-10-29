@@ -48,20 +48,22 @@ jobs:
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
-          ## 项目复盘知识卡 Skill v1.2.0
-          扫描项目资料并提醒非规范格式、压缩包与加密项；联动MinerU在线批量API或本地部署转换，合并项目内容Markdown后，Agent仅据此生成知识卡。
+          ## 项目复盘知识卡 Skill v1.3.0
+          一次向Agent提供项目文件夹，自动完成扫描提醒、本地MinerU解析、全文合并、按规范写卡、核验清理，最终保留两份Markdown。
           
           ### 本次更新
-          - 新增MinerU本地CLI调度与在线提交、查询、结果下载适配。
-          - 保留来源编号、文件哈希、转换状态与未转边界，失败默认阻止合并。
-          - 正式交付两份Markdown：项目内容总文档、项目知识卡；清理其他本次过程文件。
-          - 最终提醒使用者人工核对项目事实与成果状态。
+          - 自动识别D:/MinerU/.venv/Scripts/mineru-kit.exe、配置路径或系统PATH。
+          - 新增run_project.py统一入口，默认串行解析以适配单卡8GB显存。
+          - 不依赖WebUI或7860端口，不要求在线Token，不自动改为在线上传。
+          - Agent读取总Markdown生成知识卡并自动执行结构核验与临时文件清理。
+          - 同名历史成果保留，最终提醒人工核对后归档。
           
-          ### 安装与配置
-          WorkBuddy导入完整ZIP；豆包工作按当前版本本地导入入口导入完整资源；Codex使用本机技能目录。详见README与references/安装与使用.md。
-          本地模式另需可用的MinerU部署；在线模式需MINERU_API_TOKEN及项目资料上传授权。调用详见references/MinerU转换与合并.md。
+          ### 安装与调用
+          更新完整技能目录后，在WorkBuddy、豆包工作或Codex中说明项目文件夹及本地MinerU安装位置即可。
+          详见README、references/安装与使用.md和references/本地一键执行.md。
+          Python脚本完成解析合并；智能知识卡由Agent按规范撰写，不是脱离Agent双击脚本自动调用LLM。
           
           ### 验证边界
-          已完成脚本与模拟接口测试，尚未完成真实MinerU模型/在线账号端到端解析验收。SHA256SUMS.txt可校验安装包。
+          通过统一入口和模拟可执行文件测试；未直接访问使用者Windows D盘实机验收。附SHA256SUMS.txt。
           EOF
           gh release create "$VERSION" "dist/project-retrospective-card-$VERSION.zip" dist/SHA256SUMS.txt --target "$GITHUB_SHA" --title "项目复盘知识卡 Skill $VERSION" --notes-file release-notes.md

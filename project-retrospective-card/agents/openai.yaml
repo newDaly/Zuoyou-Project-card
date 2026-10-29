@@ -1,7 +1,7 @@
 interface:
   display_name: 项目复盘知识卡
-  short_description: 递归读取项目资料，依据复盘规范生成有来源、可核查的 Markdown 知识卡
-  default_prompt: 使用 $project-retrospective-card 读取指定项目文件夹的全部资料，按照模板和复盘规范生成项目知识卡。
+  short_description: 一次调用本地MinerU解析合并，按规范生成知识卡并保留两份Markdown
+  default_prompt: 使用 $project-retrospective-card 处理指定项目文件夹，自动调用已部署的本地MinerU解析合并、按规范生成知识卡、核验清理，保留两份Markdown并提醒我确认。
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:
