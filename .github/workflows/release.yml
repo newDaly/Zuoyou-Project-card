@@ -48,18 +48,19 @@ jobs:
         shell: bash
         run: |
           cat > release-notes.md <<'EOF'
-          ## 项目复盘知识卡 Skill v1.3.1
-          增加首次安装者必读的MinerU前置部署说明，现有本地一键处理流程保持可用。
+          ## 项目复盘知识卡 Skill v1.4.0
+          根据项目试运行改进知识卡质量，本地MinerU一键流程及两份Markdown交付保留。
           
-          ### 本次补充
-          - Windows PowerShell独立环境安装、macOS/Linux部署步骤。
-          - 模型下载、verify和真实样本文档转换三项检查。
-          - 完整Skill导入、脚本依赖及本地可执行文件路径配置。
-          - WebUI/7860端口、缺少pip、下载失败、显存不足等常见问题。
-          - 本地模型与远程服务配置边界、已有部署跳过重复安装。
+          ### 更新
+          - 限定背景、核心问题、成果和阅读笔记篇幅，减少报告全文式堆砌。
+          - 区分客户诉求、诊断发现和实施挑战，按证据判断成果状态。
+          - 冲突约束正文结论，减少无依据的效果、相关性与复用判断。
+          - 最小化个人信息，经验写明场景及适用边界。
+          - 增加来源映射、准确文件统计、登记计算、证据摘录及自报阅读范围校验。
+          - 总文档保留稳定来源标题；临时复核表通过后清理，不新增正式交付物。
           
-          首次使用请先读references/MinerU前置部署.md，再按references/安装与使用.md导入技能。
-          最终保留项目内容Markdown与项目知识卡Markdown两份文件，供人工确认及Obsidian阅读编辑。
-          命令已参照官方文档核对，未在所有硬件环境逐一安装验证。附SHA256SUMS.txt。
+          ### 验证
+          通过正反例规则测试，以及一次Agent完整写卡/校验/清理试运行。自动检查不替代语义判断及人工事实确认。
+          使用方法见README及references/知识卡质量规则.md。附SHA256SUMS.txt。
           EOF
           gh release create "$VERSION" "dist/project-retrospective-card-$VERSION.zip" dist/SHA256SUMS.txt --target "$GITHUB_SHA" --title "项目复盘知识卡 Skill $VERSION" --notes-file release-notes.md

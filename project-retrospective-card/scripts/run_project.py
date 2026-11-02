@@ -51,19 +51,16 @@ def finalize(workspace):
         raise ValueError('两份正式Markdown必须存在，且不能是符号链接')
     if hashlib.sha256(project.read_bytes()).hexdigest() != final['project_sha256']:
         raise ValueError('项目内容Markdown在生成后发生变化，请重新读取并核验后再清理')
-    text = card.read_text(encoding='utf-8-sig')
-    parts = re.split(r'^---\s*$', text, maxsplit=2, flags=re.M)
-    if len(parts) != 3 or parts[0].strip():
-        raise ValueError('知识卡缺少合法YAML头部')
-    meta = yaml.safe_load(parts[1])
-    fields = ['年度','客户全称','国标行业','客户属性','项目内容','tags','aliases','资料来源','所属省市']
-    if not isinstance(meta, dict) or any(k not in meta for k in fields):
-        raise ValueError('知识卡未保留全部9个模板字段')
-    headings = re.findall(r'^## (.+?)\s*$', parts[2], re.M)
-    if headings != ['项目背景','核心问题','最终成果','其他备注','阅读笔记']:
-        raise ValueError('知识卡必须保留模板5个二级标题及顺序')
-    if '```' not in text or '对接人' not in text or '待人工确认' not in text:
-        raise ValueError('知识卡须保留联系人代码块并标记待人工确认')
+    from card_quality import check_card
+    review_path = root / 'card_review.json'
+    review = json.loads(review_path.read_text(encoding='utf-8')) if review_path.exists() else None
+    errors, warnings = check_card(card.read_text(encoding='utf-8-sig'), data,
+                                  project.read_text(encoding='utf-8-sig'), review)
+    if errors:
+        raise ValueError('知识卡质量校验未通过：' + '；'.join(errors))
+    if warnings:
+        emit({'stage':'quality_warnings','warnings':warnings,
+              'notice':'规则提示须结合证据人工复核，代码不能判定事实真伪或效果因果。'})
     cleanup(root)
     emit({'status':'complete','files':[str(project),str(card)],
           'reminder':'请核对客户信息、项目事实、成果状态及待核实事项，确认后再正式归档。'})
@@ -114,8 +111,15 @@ def run(args):
         data['deliverables'] = {'project_markdown':str(project),'knowledge_card':str(card),
                                 'project_sha256':hashlib.sha256(project.read_bytes()).hexdigest()}
         pipeline.save(root,data)
-        emit({'stage':'awaiting_agent_card','workspace':str(root),**data['deliverables'],
-              'next':'Agent完整读取project_markdown，按Skill模板生成knowledge_card，再执行run_project.py --finish workspace完成检查与清理。不要停在合并步骤，不要求用户手动运行下一条命令。'})
+        from card_quality import stats_line
+        review_file = root / 'card_review.json'
+        review_file.write_text(json.dumps({'read_ranges':[], 'claims':[], 'calculations':[],
+            'semantic_review':{key:False for key in ['scope_separation','status_support',
+                'conflicts_constrain_claims','minimal_personal_data','reuse_boundaries','numbers_reviewed']}},
+            ensure_ascii=False,indent=2),encoding='utf-8')
+        emit({'stage':'awaiting_agent_card', 'review_file':str(review_file),
+              'statistics_sentence':stats_line(data),'workspace':str(root),**data['deliverables'],
+              'next':'Agent完整读取总文档，按精简规则写卡，并填写临时review_file的全文阅读范围、关键证据、计算与语义审核；完成后自动--finish。失败先修正，不将合并成功作为全流程结束。'})
     except BaseException:
         if root is not None:
             cleanup(root)
