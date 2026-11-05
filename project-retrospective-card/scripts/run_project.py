@@ -119,7 +119,7 @@ def run(args):
             ensure_ascii=False,indent=2),encoding='utf-8')
         emit({'stage':'awaiting_agent_card', 'review_file':str(review_file),
               'statistics_sentence':stats_line(data),'workspace':str(root),**data['deliverables'],
-              'next':'Agent完整读取总文档，按精简规则写卡，并填写临时review_file的全文阅读范围、关键证据、计算与语义审核；完成后自动--finish。失败先修正，不将合并成功作为全流程结束。'})
+              'next':'Agent完整读取总文档，按新版四部分模板写卡，并填写临时review_file的全文阅读范围、关键证据、计算与语义审核；完成后自动--finish。失败先修正，不将合并成功作为全流程结束。'})
     except BaseException:
         if root is not None:
             cleanup(root)
