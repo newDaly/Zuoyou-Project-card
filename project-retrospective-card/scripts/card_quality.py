@@ -5,8 +5,7 @@ import re
 from decimal import Decimal
 import yaml
 
-HEADINGS = ['项目背景','核心问题','最终成果','其他备注','阅读笔记']
-LIMITS = {'项目背景':260,'核心问题':600,'最终成果':1400,'其他备注':1400,'阅读笔记':2000}
+HEADINGS = ['一、项目背景','二、项目核心诉求与关键解决思路','三、项目其他创新亮点','四、项目运作经验总结']
 
 
 def compact(value):
@@ -25,50 +24,62 @@ def stats_line(data):
 
 def check_card(text, data, project_text, review=None):
     errors, warnings = [], []
-    parts = re.split(r'^---\s*$',text,maxsplit=2,flags=re.M)
+    parts=re.split(r'^---\s*$',text,maxsplit=2,flags=re.M)
     if len(parts)!=3 or parts[0].strip():
         return ['缺少合法YAML头部'], []
     try:
-        meta = yaml.safe_load(parts[1])
+        meta=yaml.safe_load(parts[1])
     except yaml.YAMLError:
         return ['YAML无法解析'], []
     required=['年度','客户全称','国标行业','客户属性','项目内容','tags','aliases','资料来源','所属省市']
-    if not isinstance(meta,dict) or any(k not in meta for k in required):
-        errors.append('未保留全部9个模板字段')
-        meta = meta if isinstance(meta,dict) else {}
+    if not isinstance(meta,dict):
+        return ['YAML必须为属性映射'], []
+    for field in required:
+        if field not in meta:errors.append('缺少强制YAML字段:'+field)
+        elif field not in ['tags','aliases','资料来源'] and (not isinstance(meta[field],(str,int)) or not str(meta[field]).strip()):
+            errors.append('YAML属性不得空置:'+field)
     for field in ['tags','aliases','资料来源']:
         if not isinstance(meta.get(field),list):errors.append(field+'必须是YAML列表')
-    if isinstance(meta.get('资料来源'),list) and len(meta['资料来源'])>5:errors.append('YAML资料来源最多5项，总文档保存完整清单')
-    if isinstance(meta.get('tags'),list) and len(meta['tags'])>8:errors.append('tags最多8项')
     if not re.fullmatch(r'\d{4}|待补充|待核实',str(meta.get('年度',''))):
-        errors.append('年度仅填写四位年份或待补充/待核实；项目周期放阅读笔记')
-    actual=re.findall(r'^## (.+?)\s*$',parts[2],re.M)
-    if actual!=HEADINGS:errors.append('须保留5个二级标题及顺序')
+        errors.append('年度仅填四位项目年度或待补充/待核实')
+    if isinstance(meta.get('资料来源'),list) and not meta['资料来源']:
+        errors.append('资料来源须指向正式项目内容总文档')
+    for field,yaml_key in [('客户名称','客户全称'),('项目内容','项目内容')]:
+        match=re.search(r'^\*\*'+field+r'：\*\*[ \t]*(.+)$',parts[2],re.M)
+        if match and meta.get(yaml_key) is not None and compact(str(meta[yaml_key]))!=compact(match.group(1)):
+            errors.append('YAML与正文信息不一致:'+field)
+
+    for field in ['客户名称','项目编号','项目名称','项目内容','项目时间']:
+        if not re.search(r'^\*\*'+field+r'：\*\*\s*\S',text,re.M):
+            errors.append('缺少基本信息:'+field)
+    actual=re.findall(r'^## (.+?)\s*$',text,re.M)
+    if actual!=HEADINGS:errors.append('须保留新版四部分二级标题及顺序')
     sections={}
     for h in HEADINGS:
-        m=re.search(r'^## '+h+r'\s*\n(.*?)(?=^## |\Z)',parts[2],re.M|re.S)
-        if m:
-            sections[h]=m.group(1)
-            if len(compact(m.group(1)))>LIMITS[h]:errors.append(h+'超出栏目长度上限')
-    if len(compact(text))>6500:errors.append('全文超过6500非空白字符，应将细节留在总文档')
-    bg=sections.get('项目背景','')
-    prose='\n'.join(line for line in bg.splitlines() if '背景标签' not in line)
-    prose=re.sub(r'\[\[[^\]]+\]\]|\[[^\]]*S\d+[^\]]*\](?:\([^)]*\))?','',prose)
-    length=len(re.findall(r'[\u4e00-\u9fffA-Za-z0-9]',prose))
-    if not 100<=length<=200 and not ('资料不足' in bg and length<100):
-        errors.append('背景叙述须100—200字；确有资料不足时短写并明确说明')
-    contacts=re.findall(r'```[^\n]*\n(.*?)```',parts[2],re.S)
-    if not any('对接人' in c for c in contacts):errors.append('缺少联系人代码块')
-    for c in contacts:
-        if '对接人' in c and len(compact(c))>220:errors.append('联系人块过长，限必要身份、联系方式和项目职责')
-    if '待人工确认' not in sections.get('阅读笔记',''):errors.append('缺少待人工确认及确认清单')
+        m=re.search(r'^## '+h+r'\s*\n(.*?)(?=^## |\Z)',text,re.M|re.S)
+        if m:sections[h]=m.group(1)
+    bg=sections.get(HEADINGS[0],'')
+    for sub in ['（一）行业与企业背景','（二）战略与经营背景']:
+        if not re.search(r'^### '+re.escape(sub)+r'\s*$',bg,re.M):errors.append('缺少背景层次:'+sub)
+    core=sections.get(HEADINGS[1],'')
+    groups=re.split(r'^### 项目核心诉求\d+[：:]',core,flags=re.M)[1:]
+    if not groups and not any(w in core for w in ['资料不足','待补充','未提供']):
+        errors.append('核心诉求缺失且未说明资料不足')
+    for group in groups:
+        if not re.search(r'关键解决思路[：:]',group):errors.append('核心诉求缺少对应关键解决思路')
+    if len(compact(text))>6500:warnings.append('全文较长，请复核重复与无关信息，保留复用所需机制与参数')
+    if re.search(r'填写说明|可选标签示例|________|待补充具体问题场景|待填写脚本生成',text):
+        errors.append('正式知识卡仍残留填写提示或空白占位')
+    if '<summary>核验附注（非复盘正文）</summary>' not in text or '</details>' not in text:
+        errors.append('缺少文末可折叠核验附注')
+    notes=text.split('<summary>核验附注（非复盘正文）</summary>',1)[-1] if '<summary>核验附注（非复盘正文）</summary>' in text else ''
+    if '待人工确认' not in notes:errors.append('缺少待人工确认及确认清单')
     chunks=source_chunks(project_text)
     cited=set(re.findall(r'\bS\d{4,}\b',text))
     known={r['id']:r for r in data['files']}
     missing=cited-set(known)
     if missing:errors.append('未知来源编号:'+','.join(sorted(missing)))
     # A source map uses full relative paths; abbreviated names cannot be verified.
-    notes=sections.get('阅读笔记','')
     mapped=set(re.findall(r'^\|\s*(S\d{4,})\s*\|',notes,re.M))
     if cited-mapped:errors.append('来源映射缺项:'+','.join(sorted(cited-mapped)))
     for sid in cited & set(known):
